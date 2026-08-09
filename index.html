@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>מסך לובי</title>
+<style>
+:root{--green:#0cad43;--deep:#0a3a2a;--border:#cfd5d8}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-family:Arial,"Noto Sans Hebrew",sans-serif;color:#111}
+.app{width:100vw;height:100vh;background:#fff;display:grid;grid-template-columns:60% 40%;grid-template-rows:calc(100vh - 92px) 92px;direction:ltr}
+.visual{position:relative;overflow:hidden;background:#ccefff;border-right:1px solid var(--border)}
+.visual img{width:100%;height:100%;object-fit:cover;display:block}
+.panel{direction:rtl;padding:18px 22px 12px;display:grid;grid-template-rows:auto auto auto 1fr;gap:10px;background:#fff}
+.topbar{background:#242a31;color:#fff;text-align:center;font-size:28px;font-weight:700;padding:10px;border-radius:2px}
+.clock{text-align:center}
+.time{font-size:92px;line-height:1;color:#17c53f;font-weight:500;letter-spacing:2px}
+.date{font-size:24px;margin-top:7px;color:#333}
+.hdate{font-size:17px;margin-top:5px;color:#666}
+.weather{border-top:1px solid #d7d7d7;border-bottom:1px solid #e5e5e5;padding:12px 0 13px;display:grid;grid-template-columns:1.05fr 1.2fr;gap:10px;align-items:center}
+.now{display:flex;justify-content:center;align-items:center;gap:12px}
+.bigicon{font-size:60px}.bigtemp{font-size:58px;line-height:1}.desc{font-size:18px;color:#555;margin-top:6px}
+.forecast{display:grid;grid-template-columns:repeat(3,1fr)}
+.fday{text-align:center;border-right:1px solid #ddd;font-size:15px}.fday:last-child{border-right:none}.ficon{font-size:27px;margin:5px 0}.fhi{font-size:20px}.flo{font-size:14px;color:#777}
+.notices{align-self:stretch;background:linear-gradient(#11ad41,#079437);color:#fff;overflow:hidden}
+.ntitle{text-align:center;font-size:28px;font-weight:700;padding:10px;border-bottom:1px solid rgba(255,255,255,.28)}
+.nbody{padding:9px 16px;font-size:20px;line-height:1.55}
+.ticker{grid-column:1/3;display:grid;grid-template-columns:190px 1fr;background:#f5f5f5;border-top:1px solid #c7c7c7;overflow:hidden;direction:ltr}
+.brand{display:flex;align-items:center;justify-content:center;gap:5px;border-right:1px solid #bbb;font:bold 41px Arial;direction:ltr}
+.y{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#d90000;color:#fff;font-size:38px}
+.newswindow{position:relative;overflow:hidden;height:100%}
+.newsline{position:absolute;top:50%;white-space:nowrap;font-size:25px;transform:translateY(-50%);animation:move 55s linear infinite;direction:rtl}
+@keyframes move{0%{left:100%}100%{left:-300%}}
+.live{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.58);color:#fff;border-radius:7px;padding:5px 8px;font-size:12px;z-index:5;direction:rtl}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#31dd69;margin-left:5px}
+@media(max-width:1000px){.time{font-size:70px}.topbar{font-size:22px}.date{font-size:19px}.nbody{font-size:17px}.newsline{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="visual">
+    <div class="live"><span class="dot"></span><span id="liveText">מתעדכן אוטומטית</span></div>
+    <img src="cleanliness.jpg" onerror="this.src='cleanliness.svg'" alt="נא לשמור על הניקיון">
+  </section>
+
+  <aside class="panel">
+    <div class="topbar">ברוכים הבאים לבניין</div>
+
+    <div class="clock">
+      <div class="time" id="time">--:--</div>
+      <div class="date" id="date"></div>
+      <div class="hdate" id="hdate"></div>
+    </div>
+
+    <div class="weather">
+      <div class="now">
+        <div class="bigicon" id="wicon">☀️</div>
+        <div>
+          <div class="bigtemp" id="temp">--°</div>
+          <div class="desc" id="desc">מזג האוויר בנתניה</div>
+        </div>
+      </div>
+      <div class="forecast" id="forecast"></div>
+    </div>
+
+    <div class="notices">
+      <div class="ntitle">הודעות לדיירים</div>
+      <div class="nbody">
+        <div>• נא לשמור על ניקיון הלובי והשטחים המשותפים</div>
+        <div>• אין להשאיר שקיות אשפה במסדרונות</div>
+        <div>• קרטונים יש להשליך בחדר הקרטונים בלבד</div>
+        <div>• תודה על שיתוף הפעולה</div>
+      </div>
+    </div>
+  </aside>
+
+  <footer class="ticker">
+    <div class="brand"><span class="y">y</span><span>net</span></div>
+    <div class="newswindow"><div class="newsline" id="news">טוען כותרות ynet...</div></div>
+  </footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function updateClock(){
+  const d=new Date();
+  $('time').textContent=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit',hour12:false});
+  $('date').textContent=d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  try{
+    $('hdate').textContent=new Intl.DateTimeFormat('he-IL-u-ca-hebrew',{day:'numeric',month:'long',year:'numeric'}).format(d);
+  }catch(e){}
+}
+updateClock(); setInterval(updateClock,1000);
+
+function weatherLabel(c){
+ const m={0:['בהיר','☀️'],1:['בהיר לרוב','🌤️'],2:['מעונן חלקית','⛅'],3:['מעונן','☁️'],45:['ערפל','🌫️'],48:['ערפל','🌫️'],51:['טפטוף קל','🌦️'],53:['טפטוף','🌦️'],55:['טפטוף חזק','🌧️'],61:['גשם קל','🌦️'],63:['גשם','🌧️'],65:['גשם חזק','🌧️'],80:['ממטרים','🌦️'],81:['ממטרים','🌧️'],82:['ממטרים חזקים','⛈️'],95:['סופת רעמים','⛈️'],96:['סופת רעמים','⛈️'],99:['סופת רעמים','⛈️']};
+ return m[c]||['מזג אוויר','🌤️'];
+}
+async function getJSON(url, timeout=10000){
+ const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),timeout);
+ try{const r=await fetch(url,{cache:'no-store',signal:ctl.signal}); if(!r.ok) throw new Error(r.status); return await r.json();}
+ finally{clearTimeout(t);}
+}
+async function updateWeather(){
+ try{
+   let d;
+   try{ d=await getJSON('/api/weather?ts='+Date.now()); }
+   catch(e){
+     d=await getJSON('https://api.open-meteo.com/v1/forecast?latitude=32.3215&longitude=34.8532&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Asia%2FJerusalem&forecast_days=4&ts='+Date.now());
+   }
+   const [txt,ic]=weatherLabel(d.current.weather_code);
+   $('temp').textContent=Math.round(d.current.temperature_2m)+'°';
+   $('desc').textContent=txt+' • נתניה';
+   $('wicon').textContent=ic;
+   $('forecast').innerHTML='';
+   ['היום','מחר','מחרתיים'].forEach((name,i)=>{
+      const [,fi]=weatherLabel(d.daily.weather_code[i]);
+      $('forecast').insertAdjacentHTML('beforeend',`<div class="fday"><div>${name}</div><div class="ficon">${fi}</div><div class="fhi">${Math.round(d.daily.temperature_2m_max[i])}°</div><div class="flo">${Math.round(d.daily.temperature_2m_min[i])}°</div></div>`);
+   });
+ }catch(e){$('desc').textContent='מזג האוויר יתעדכן כשיהיה חיבור';}
+}
+updateWeather(); setInterval(updateWeather,10*60*1000);
+
+async function updateNews(){
+ try{
+   const d=await getJSON('/api/ynet?ts='+Date.now(),12000);
+   if(d.items && d.items.length){
+      $('news').textContent=d.items.map(x=>x.title).join('   •   ');
+      $('liveText').textContent='חדשות ומזג אוויר מעודכנים';
+   }
+ }catch(e){
+   $('news').textContent='חדשות ynet יתעדכנו אוטומטית לאחר העלאת המערכת לשרת';
+ }
+}
+updateNews(); setInterval(updateNews,3*60*1000);
+
+// Refresh the app periodically to avoid stale Android WebView sessions.
+setTimeout(()=>location.reload(), 6*60*60*1000);
+</script>
+</body>
+</html>
