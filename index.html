@@ -37,7 +37,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 </section>
 <aside class="panel">
 <div class="topbar">ברוכים הבאים לבניין</div>
-<div class="clock"><div class="time" id="time">--:--</div><div class="date" id="date"></div><div class="hdate" id="hdate"></div></div>
+<div class="clock"><div class="time" id="time">--:--</div><div class="date" id="date"></div></div>
 <div class="weather">
 <div class="now"><div class="bigicon" id="wicon">☀️</div><div><div class="bigtemp" id="temp">--°</div><div class="desc" id="desc">מזג האוויר בנתניה</div></div></div>
 <div class="forecast" id="forecast"></div>
@@ -60,7 +60,6 @@ function updateClock(){
  const d=new Date();
  $('time').textContent=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit',hour12:false});
  $('date').textContent=d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
- try{$('hdate').textContent=new Intl.DateTimeFormat('he-IL-u-ca-hebrew',{day:'numeric',month:'long',year:'numeric'}).format(d)}catch(e){}
 }
 updateClock();setInterval(updateClock,1000);
 
