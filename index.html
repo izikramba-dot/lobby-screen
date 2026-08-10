@@ -26,12 +26,49 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 .notices{align-self:stretch;background:linear-gradient(#11ad41,#079437);color:#fff;overflow:hidden}
 .ntitle{text-align:center;font-size:28px;font-weight:700;padding:10px;border-bottom:1px solid rgba(255,255,255,.28)}
 .nbody{padding:9px 16px;font-size:20px;line-height:1.55}
-.ticker{grid-column:1/3;display:grid;grid-template-columns:190px 1fr;background:#f5f5f5;border-top:1px solid #c7c7c7;overflow:hidden;direction:ltr}
-.brand{display:flex;align-items:center;justify-content:center;gap:5px;border-right:1px solid #bbb;font:bold 41px Arial;direction:ltr}
+
+/* YNET מימין, חדשות RTL */
+.ticker{
+  grid-column:1/3;
+  display:grid;
+  grid-template-columns:1fr 190px;
+  background:#f5f5f5;
+  border-top:1px solid #c7c7c7;
+  overflow:hidden;
+  direction:ltr;
+}
+.newswindow{
+  position:relative;
+  overflow:hidden;
+  height:100%;
+  direction:rtl;
+}
+.newsline{
+  position:absolute;
+  top:50%;
+  right:100%;
+  white-space:nowrap;
+  font-size:25px;
+  transform:translateY(-50%);
+  animation:moveRTL 55s linear infinite;
+  direction:rtl;
+  text-align:right;
+}
+@keyframes moveRTL{
+  0%{right:100%}
+  100%{right:-300%}
+}
+.brand{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  border-left:1px solid #bbb;
+  font:bold 41px Arial;
+  direction:ltr;
+}
 .y{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#d90000;color:#fff;font-size:38px}
-.newswindow{position:relative;overflow:hidden;height:100%}
-.newsline{position:absolute;top:50%;white-space:nowrap;font-size:25px;transform:translateY(-50%);animation:move 55s linear infinite;direction:rtl}
-@keyframes move{0%{left:100%}100%{left:-300%}}
+
 .live{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.58);color:#fff;border-radius:7px;padding:5px 8px;font-size:12px;z-index:5;direction:rtl}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#31dd69;margin-left:5px}
 @media(max-width:1000px){.time{font-size:70px}.topbar{font-size:22px}.date{font-size:19px}.nbody{font-size:17px}.newsline{font-size:21px}}
@@ -41,7 +78,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 <div class="app">
   <section class="visual">
     <div class="live"><span class="dot"></span><span id="liveText">מתעדכן אוטומטית</span></div>
-    <img src="cleanliness.jpg" onerror="this.src='cleanliness.svg'" alt="נא לשמור על הניקיון">
+    <img id="lobbyImage" src="cleanliness.jpg" alt="הודעות לדיירים">
   </section>
 
   <aside class="panel">
@@ -68,16 +105,16 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
       <div class="ntitle">הודעות לדיירים</div>
       <div class="nbody">
         <div>• נא לשמור על ניקיון הלובי והשטחים המשותפים</div>
-        <div>• אין להשאיר שקיות אשפה במסדרונות</div>
-        <div>• קרטונים יש להשליך בחדר הקרטונים בלבד</div>
+        <div>• אין להשאיר ציוד בשטחים המשותפים</div>
+        <div>• המבנה מצולם 24/7</div>
         <div>• תודה על שיתוף הפעולה</div>
       </div>
     </div>
   </aside>
 
   <footer class="ticker">
-    <div class="brand"><span class="y">y</span><span>net</span></div>
     <div class="newswindow"><div class="newsline" id="news">טוען כותרות ynet...</div></div>
+    <div class="brand"><span class="y">y</span><span>net</span></div>
   </footer>
 </div>
 
@@ -93,6 +130,20 @@ function updateClock(){
   }catch(e){}
 }
 updateClock(); setInterval(updateClock,1000);
+
+/* החלפת תמונה אוטומטית כל 30 דקות */
+const lobbyImages=['cleanliness.jpg','equipment.jpg','cameras.jpg'];
+function updateLobbyImage(){
+  const slot=Math.floor(Date.now()/(30*60*1000));
+  const index=slot%lobbyImages.length;
+  const img=$('lobbyImage');
+  const wanted=lobbyImages[index];
+  if(!img.src.includes(wanted)){
+    img.src=wanted+'?slot='+slot;
+  }
+}
+updateLobbyImage();
+setInterval(updateLobbyImage,60*1000);
 
 function weatherLabel(c){
  const m={0:['בהיר','☀️'],1:['בהיר לרוב','🌤️'],2:['מעונן חלקית','⛅'],3:['מעונן','☁️'],45:['ערפל','🌫️'],48:['ערפל','🌫️'],51:['טפטוף קל','🌦️'],53:['טפטוף','🌦️'],55:['טפטוף חזק','🌧️'],61:['גשם קל','🌦️'],63:['גשם','🌧️'],65:['גשם חזק','🌧️'],80:['ממטרים','🌦️'],81:['ממטרים','🌧️'],82:['ממטרים חזקים','⛈️'],95:['סופת רעמים','⛈️'],96:['סופת רעמים','⛈️'],99:['סופת רעמים','⛈️']};
@@ -131,12 +182,11 @@ async function updateNews(){
       $('liveText').textContent='חדשות ומזג אוויר מעודכנים';
    }
  }catch(e){
-   $('news').textContent='חדשות ynet יתעדכנו אוטומטית לאחר העלאת המערכת לשרת';
+   $('news').textContent='חדשות ynet יתעדכנו אוטומטית כשהחיבור זמין';
  }
 }
 updateNews(); setInterval(updateNews,3*60*1000);
 
-// Refresh the app periodically to avoid stale Android WebView sessions.
 setTimeout(()=>location.reload(), 6*60*60*1000);
 </script>
 </body>
