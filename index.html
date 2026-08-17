@@ -84,14 +84,14 @@ const $=id=>document.getElementById(id);
 
 /* רוטציה קבועה כל 20 דקות:
    00-19 = mishael-motors.png
-   20-39 = gurman.png
-   40-59 = cleanliness.jpg
+   20-39 = cleanliness.jpg
+   40-59 = gurman.png
 */
 function updateLobbyImage(){
   const minutes = new Date().getMinutes();
   let wanted = 'mishael-motors.png';
-  if(minutes >= 20 && minutes < 40) wanted = 'gurman.png';
-  if(minutes >= 40) wanted = 'cleanliness.jpg';
+  if(minutes >= 20 && minutes < 40) wanted = 'cleanliness.jpg';
+  if(minutes >= 40) wanted = 'gurman.png';
 
   const img = $('mainImage');
   const target = wanted + '?v=' + Math.floor(Date.now() / (20*60*1000));
