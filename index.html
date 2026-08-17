@@ -40,7 +40,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 <body>
 <div class="app">
   <section class="visual">
-    <img id="mainImage" src="gurman.png" alt="תמונת לובי">
+    <img id="mainImage" src="pizza-balls.png" alt="תמונת לובי">
   </section>
 
   <aside class="panel">
@@ -82,19 +82,22 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 <script>
 const $=id=>document.getElementById(id);
 
-/* רוטציה קבועה כל 20 דקות:
-   00-19 = gurman.png
-   20-39 = cleanliness.jpg
-   40-59 = mishael-motors.png
+/* רוטציה קבועה ושווה בין 4 תמונות — כל 15 דקות:
+   00-14 = pizza-balls.png
+   15-29 = gurman.png
+   30-44 = mishael-motors.png
+   45-59 = cleanliness.jpg
 */
 function updateLobbyImage(){
   const minutes = new Date().getMinutes();
-  let wanted = 'gurman.png';
-  if(minutes >= 20 && minutes < 40) wanted = 'cleanliness.jpg';
-  if(minutes >= 40) wanted = 'mishael-motors.png';
+  let wanted = 'pizza-balls.png';
+
+  if(minutes >= 15 && minutes < 30) wanted = 'gurman.png';
+  else if(minutes >= 30 && minutes < 45) wanted = 'mishael-motors.png';
+  else if(minutes >= 45) wanted = 'cleanliness.jpg';
 
   const img = $('mainImage');
-  const target = wanted + '?v=' + Math.floor(Date.now() / (20*60*1000));
+  const target = wanted + '?v=' + Math.floor(Date.now() / (15*60*1000));
   if(!img.src.includes(wanted)) img.src = target;
 }
 updateLobbyImage();
