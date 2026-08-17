@@ -82,7 +82,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 <script>
 const $=id=>document.getElementById(id);
 
-/* רוטציה בין כל התמונות — כל 2 דקות */
+/* רוטציה מסונכרנת לשעון — כל 2 דקות */
 const lobbyImages = [
   'gurman.png',
   'pizza-balls.png',
@@ -91,20 +91,22 @@ const lobbyImages = [
   'cleanliness.jpg'
 ];
 
-let lobbyIndex = 0;
-
 function updateLobbyImage(){
+  const now = new Date();
+  const totalMinutes = now.getHours() * 60 + now.getMinutes();
+
+  // מחזור של 10 דקות: 5 תמונות × 2 דקות
+  const slot = Math.floor((totalMinutes % 10) / 2);
+  const wanted = lobbyImages[slot];
+
   const img = $('mainImage');
-  const wanted = lobbyImages[lobbyIndex];
-  img.src = wanted + '?v=' + Date.now();
+  if (!img.src.includes(wanted)) {
+    img.src = wanted + '?v=' + Math.floor(Date.now() / (2 * 60 * 1000));
+  }
 }
 
 updateLobbyImage();
-
-setInterval(() => {
-  lobbyIndex = (lobbyIndex + 1) % lobbyImages.length;
-  updateLobbyImage();
-}, 2 * 60 * 1000);
+setInterval(updateLobbyImage, 15 * 1000);
 function updateClock(){
   const d=new Date();
   $('time').textContent=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit',hour12:false});
