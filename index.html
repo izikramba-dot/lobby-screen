@@ -83,7 +83,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 <body>
 <div class="app">
   <div class="visual">
-    <img id="mainImage" src="cleanliness.jpg" alt="תמונת לובי">
+    <img id="mainImage" src="mishael-motors.png" alt="תמונת לובי">
   </div>
 
   <div class="panel">
@@ -123,13 +123,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 </div>
 
 <script>
-const ROTATE_EVERY = 30 * 60 * 1000;
-const images = ["cleanliness.jpg", "mishael-motors.png"];
-
+// 00-29 דקות: MISHAEL MOTORS
+// 30-59 דקות: תמונת הניקיון
 function updateImageByTime(){
-  const index = Math.floor(Date.now() / ROTATE_EVERY) % images.length;
+  const minutes = new Date().getMinutes();
+  const wanted = minutes < 30 ? "mishael-motors.png" : "cleanliness.jpg";
   const img = document.getElementById("mainImage");
-  const wanted = images[index];
   if (!img.src.endsWith(wanted)) img.src = wanted;
 }
 updateImageByTime();
