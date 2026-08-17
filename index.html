@@ -82,27 +82,29 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 <script>
 const $=id=>document.getElementById(id);
 
-/* רוטציה קבועה ושווה בין 4 תמונות — כל 15 דקות:
-   00-14 = gurman.png
-   15-29 = pizza-balls.png
-   30-44 = mishael-motors.png
-   45-59 = cleanliness.jpg
-*/
+/* רוטציה בין כל התמונות — כל 2 דקות */
+const lobbyImages = [
+  'gurman.png',
+  'pizza-balls.png',
+  'mishael-motors.png',
+  'business-ad.png',
+  'cleanliness.jpg'
+];
+
+let lobbyIndex = 0;
+
 function updateLobbyImage(){
-  const minutes = new Date().getMinutes();
-  let wanted = 'gurman.png';
-
-  if(minutes >= 15 && minutes < 30) wanted = 'pizza-balls.png';
-  else if(minutes >= 30 && minutes < 45) wanted = 'mishael-motors.png';
-  else if(minutes >= 45) wanted = 'cleanliness.jpg';
-
   const img = $('mainImage');
-  const target = wanted + '?v=' + Math.floor(Date.now() / (15*60*1000));
-  if(!img.src.includes(wanted)) img.src = target;
+  const wanted = lobbyImages[lobbyIndex];
+  img.src = wanted + '?v=' + Date.now();
 }
-updateLobbyImage();
-setInterval(updateLobbyImage, 30*1000);
 
+updateLobbyImage();
+
+setInterval(() => {
+  lobbyIndex = (lobbyIndex + 1) % lobbyImages.length;
+  updateLobbyImage();
+}, 2 * 60 * 1000);
 function updateClock(){
   const d=new Date();
   $('time').textContent=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit',hour12:false});
