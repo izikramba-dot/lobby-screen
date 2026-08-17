@@ -40,7 +40,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 <body>
 <div class="app">
   <section class="visual">
-    <img id="mainImage" src="gurman.png" alt="תמונת לובי">
+    <img id="mainImage" src="mishael-motors.png" alt="תמונת לובי">
   </section>
 
   <aside class="panel">
@@ -83,14 +83,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 const $=id=>document.getElementById(id);
 
 /* רוטציה קבועה כל 20 דקות:
-   00-19 = gurman.png
-   20-39 = mishael-motors.png
+   00-19 = mishael-motors.png
+   20-39 = gurman.png
    40-59 = cleanliness.jpg
 */
 function updateLobbyImage(){
   const minutes = new Date().getMinutes();
-  let wanted = 'gurman.png';
-  if(minutes >= 20 && minutes < 40) wanted = 'mishael-motors.png';
+  let wanted = 'mishael-motors.png';
+  if(minutes >= 20 && minutes < 40) wanted = 'gurman.png';
   if(minutes >= 40) wanted = 'cleanliness.jpg';
 
   const img = $('mainImage');
