@@ -13,7 +13,7 @@
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-family:Arial,"Noto Sans Hebrew",sans-serif;color:#111}
 .app{width:100vw;height:100vh;background:#fff;display:grid;grid-template-columns:60% 40%;grid-template-rows:calc(100vh - 92px) 92px;direction:ltr}
 .visual{position:relative;overflow:hidden;background:#fff;border-right:1px solid var(--border)}
-.visual img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;background:#fff}
+.visual img{width:100%;height:100%;object-fit:cover;display:block}
 .panel{direction:rtl;padding:18px 22px 12px;display:grid;grid-template-rows:auto auto auto 1fr;gap:10px;background:#fff}
 .topbar{background:#242a31;color:#fff;text-align:center;font-size:28px;font-weight:700;padding:10px}
 .clock{text-align:center}
@@ -28,33 +28,59 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 .notices{align-self:stretch;background:linear-gradient(#11ad41,#079437);color:#fff;overflow:hidden}
 .ntitle{text-align:center;font-size:28px;font-weight:700;padding:10px;border-bottom:1px solid rgba(255,255,255,.28)}
 .nbody{padding:12px 16px;font-size:20px;line-height:1.55;text-align:right}
-.ticker{grid-column:1/3;display:grid;grid-template-columns:190px 1fr;background:#fff;border-top:1px solid #bbb;direction:ltr}
-.brand{display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:28px;border-right:1px solid #bbb}
-.ycircle{width:46px;height:46px;border-radius:50%;background:#d71920;color:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700}
-.newswrap{direction:rtl;overflow:hidden;white-space:nowrap;display:flex;align-items:center}
-.news{display:inline-block;padding-left:100%;animation:scroll 42s linear infinite;font-size:22px;color:#333}
-@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(100%)}}
+
+/* YNET בדיוק כמו בגרסה הישנה שעבדה */
+.ticker{
+  grid-column:1/3;
+  display:grid;
+  grid-template-columns:1fr 190px;
+  background:#f5f5f5;
+  border-top:1px solid #c7c7c7;
+  overflow:hidden;
+  direction:ltr
+}
+.newswindow{position:relative;overflow:hidden;height:100%;direction:rtl}
+.newsline{
+  position:absolute;
+  top:50%;
+  right:100%;
+  white-space:nowrap;
+  font-size:25px;
+  transform:translateY(-50%);
+  animation:moveRTL 55s linear infinite;
+  direction:rtl;
+  text-align:right
+}
+@keyframes moveRTL{0%{right:100%}100%{right:-300%}}
+.brand{
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  border-left:1px solid #bbb;
+  font:bold 41px Arial;
+  direction:ltr
+}
+.y{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#d90000;color:#fff;font-size:38px}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="visual">
-    <img id="mainImage" src="mishael-motors.png?v=4" alt="תמונת לובי">
-  </div>
+  <section class="visual">
+    <img id="mainImage" src="mishael-motors.png" alt="תמונת לובי">
+  </section>
 
-  <div class="panel">
+  <aside class="panel">
     <div class="topbar">ברוכים הבאים לבניין</div>
+
     <div class="clock">
       <div class="time" id="time">--:--</div>
-      <div class="date" id="date">טוען תאריך...</div>
+      <div class="date" id="date"></div>
     </div>
 
     <div class="weather">
       <div class="now">
-        <div class="bigicon" id="bigIcon">☀️</div>
+        <div class="bigicon" id="wicon">☀️</div>
         <div>
-          <div class="bigtemp"><span id="temp">--</span>°</div>
-          <div class="desc" id="weatherDesc">מזג האוויר בנתניה</div>
+          <div class="bigtemp" id="temp">--°</div>
+          <div class="desc" id="desc">מזג האוויר בנתניה</div>
         </div>
       </div>
       <div class="forecast" id="forecast"></div>
@@ -63,133 +89,89 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
     <div class="notices">
       <div class="ntitle">הודעות לדיירים</div>
       <div class="nbody">
-        • נא לשמור על ניקיון הלובי והשטחים המשותפים<br>
-        • החניון והשטחים המשותפים מצולמים 24/7
+        <div>• נא לשמור על ניקיון הלובי והשטחים המשותפים</div>
+        <div>• אין להשאיר ציוד בשטחים המשותפים</div>
+        <div>• המבנה מצולם 24/7</div>
+        <div>• תודה על שיתוף הפעולה</div>
       </div>
     </div>
-  </div>
+  </aside>
 
-  <div class="ticker">
-    <div class="brand"><span class="ycircle">y</span><span>net</span></div>
-    <div class="newswrap">
-      <div class="news" id="newsTrack">טוען כותרות ynet...</div>
-    </div>
-  </div>
+  <footer class="ticker">
+    <div class="newswindow"><div class="newsline" id="news">טוען כותרות ynet...</div></div>
+    <div class="brand"><span class="y">y</span><span>net</span></div>
+  </footer>
 </div>
 
 <script>
-const ROTATE_EVERY = 30 * 60 * 1000;
-const image = document.getElementById("mainImage");
+const $=id=>document.getElementById(id);
 
-// מתחיל ב-MISHAEL MOTORS, ואחרי 30 דקות מתחלף לניקיון
-let showingMishael = true;
-
-function setImage() {
-  const file = showingMishael ? "mishael-motors.png" : "cleanliness.jpg";
-  image.src = file + "?v=" + Date.now();
+/* תמונות: מתחיל בפרסומת, אחרי 30 דקות ניקיון, וחוזר חלילה */
+let showingMishael=true;
+function setLobbyImage(){
+  $('mainImage').src=(showingMishael?'mishael-motors.png':'cleanliness.jpg')+'?v='+Date.now();
 }
-setImage();
-
-setInterval(() => {
-  showingMishael = !showingMishael;
-  setImage();
-}, ROTATE_EVERY);
+setLobbyImage();
+setInterval(()=>{
+  showingMishael=!showingMishael;
+  setLobbyImage();
+},30*60*1000);
 
 function updateClock(){
-  const now = new Date();
-  document.getElementById("time").textContent =
-    now.toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit",hour12:false});
-  document.getElementById("date").textContent =
-    now.toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  const d=new Date();
+  $('time').textContent=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit',hour12:false});
+  $('date').textContent=d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 }
 updateClock();
 setInterval(updateClock,1000);
 
-function iconFor(code){
-  if(code===0) return "☀️";
-  if([1,2].includes(code)) return "🌤️";
-  if(code===3) return "☁️";
-  if([45,48].includes(code)) return "🌫️";
-  if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code)) return "🌧️";
-  if([71,73,75,77,85,86].includes(code)) return "❄️";
-  if([95,96,99].includes(code)) return "⛈️";
-  return "🌤️";
+function weatherLabel(c){
+ const m={0:['בהיר','☀️'],1:['בהיר לרוב','🌤️'],2:['מעונן חלקית','⛅'],3:['מעונן','☁️'],45:['ערפל','🌫️'],48:['ערפל','🌫️'],51:['טפטוף קל','🌦️'],53:['טפטוף','🌦️'],55:['טפטוף חזק','🌧️'],61:['גשם קל','🌦️'],63:['גשם','🌧️'],65:['גשם חזק','🌧️'],80:['ממטרים','🌦️'],81:['ממטרים','🌧️'],82:['ממטרים חזקים','⛈️'],95:['סופת רעמים','⛈️'],96:['סופת רעמים','⛈️'],99:['סופת רעמים','⛈️']};
+ return m[c]||['מזג אוויר','🌤️'];
 }
-function descFor(code){
-  if(code===0) return "בהיר";
-  if([1,2].includes(code)) return "מעונן חלקית";
-  if(code===3) return "מעונן";
-  if([45,48].includes(code)) return "ערפל";
-  if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code)) return "גשום";
-  if([95,96,99].includes(code)) return "סופות רעמים";
-  return "מזג האוויר בנתניה";
+async function getJSON(url,timeout=12000){
+ const ctl=new AbortController(), t=setTimeout(()=>ctl.abort(),timeout);
+ try{
+   const r=await fetch(url,{cache:'no-store',signal:ctl.signal});
+   if(!r.ok) throw new Error(r.status);
+   return await r.json();
+ } finally { clearTimeout(t); }
 }
-async function loadWeather(){
-  try{
-    const url="https://api.open-meteo.com/v1/forecast?latitude=32.3329&longitude=34.8599&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Asia%2FJerusalem&forecast_days=4";
-    const r=await fetch(url,{cache:"no-store"});
-    const d=await r.json();
-
-    document.getElementById("temp").textContent=Math.round(d.current.temperature_2m);
-    document.getElementById("bigIcon").textContent=iconFor(d.current.weather_code);
-    document.getElementById("weatherDesc").textContent=descFor(d.current.weather_code)+" • נתניה";
-
-    const names=["היום","מחר","מחרתיים"];
-    let html="";
-    for(let i=1;i<=3;i++){
-      html+=`<div class="fday">
-        <div>${names[i-1]}</div>
-        <div class="ficon">${iconFor(d.daily.weather_code[i])}</div>
-        <div class="fhi">${Math.round(d.daily.temperature_2m_max[i])}°</div>
-        <div class="flo">${Math.round(d.daily.temperature_2m_min[i])}°</div>
-      </div>`;
-    }
-    document.getElementById("forecast").innerHTML=html;
-  }catch(e){
-    document.getElementById("weatherDesc").textContent="מזג האוויר בנתניה";
-  }
+async function updateWeather(){
+ try{
+   const d=await getJSON('https://api.open-meteo.com/v1/forecast?latitude=32.3215&longitude=34.8532&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Asia%2FJerusalem&forecast_days=4&ts='+Date.now());
+   const [txt,ic]=weatherLabel(d.current.weather_code);
+   $('temp').textContent=Math.round(d.current.temperature_2m)+'°';
+   $('desc').textContent=txt+' • נתניה';
+   $('wicon').textContent=ic;
+   $('forecast').innerHTML='';
+   ['היום','מחר','מחרתיים'].forEach((name,i)=>{
+      const [,fi]=weatherLabel(d.daily.weather_code[i]);
+      $('forecast').insertAdjacentHTML('beforeend',
+        `<div class="fday"><div>${name}</div><div class="ficon">${fi}</div><div class="fhi">${Math.round(d.daily.temperature_2m_max[i])}°</div><div class="flo">${Math.round(d.daily.temperature_2m_min[i])}°</div></div>`);
+   });
+ }catch(e){$('desc').textContent='מזג האוויר יתעדכן כשיהיה חיבור';}
 }
-loadWeather();
-setInterval(loadWeather,20*60*1000);
+updateWeather();
+setInterval(updateWeather,10*60*1000);
 
-// חדשות YNET חיות - עדכון אוטומטי כל 5 דקות
-async function updateYnet(){
-  const rss='https://www.ynet.co.il/Integration/StoryRss1854.xml';
-  const proxies=[
-    'https://api.allorigins.win/raw?url='+encodeURIComponent(rss),
-    'https://corsproxy.io/?'+encodeURIComponent(rss)
-  ];
-
-  let text='';
-  for(const p of proxies){
-    try{
-      const r=await fetch(p,{cache:'no-store'});
-      if(r.ok){
-        text=await r.text();
-        if(text) break;
-      }
-    }catch(e){}
-  }
-
-  if(!text){
-    document.getElementById('newsTrack').textContent=
-      'חדשות ynet אינן זמינות כרגע • המסך ינסה להתעדכן שוב אוטומטית';
-    return;
-  }
-
-  const xml=new DOMParser().parseFromString(text,'text/xml');
-  const items=[...xml.querySelectorAll('item title')]
-    .slice(0,12)
-    .map(x=>x.textContent.trim())
-    .filter(Boolean);
-
-  if(items.length){
-    document.getElementById('newsTrack').textContent=items.join('   •   ');
-  }
+/* חדשות YNET דרך Cloudflare Pages Function - כמו במערכת הישנה */
+async function updateNews(){
+ try{
+   const d=await getJSON('/api/ynet?ts='+Date.now(),12000);
+   if(d.items && d.items.length){
+      $('news').textContent=d.items.map(x=>x.title).join('   •   ');
+   } else {
+      throw new Error('no items');
+   }
+ }catch(e){
+   $('news').textContent='חדשות ynet יתעדכנו אוטומטית כשהחיבור זמין';
+ }
 }
+updateNews();
+setInterval(updateNews,3*60*1000);
 
-updateYnet();
-setInterval(updateYnet,5*60*1000);
+setTimeout(()=>location.reload(),6*60*60*1000);
 </script>
 </body>
 </html>
