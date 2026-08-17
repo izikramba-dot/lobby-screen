@@ -13,7 +13,7 @@
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-family:Arial,"Noto Sans Hebrew",sans-serif;color:#111}
 .app{width:100vw;height:100vh;background:#fff;display:grid;grid-template-columns:60% 40%;grid-template-rows:calc(100vh - 92px) 92px;direction:ltr}
 .visual{position:relative;overflow:hidden;background:#fff;border-right:1px solid var(--border)}
-.visual img{width:100%;height:100%;object-fit:cover;display:block}
+.visual img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;background:#fff}
 .panel{direction:rtl;padding:18px 22px 12px;display:grid;grid-template-rows:auto auto auto 1fr;gap:10px;background:#fff}
 .topbar{background:#242a31;color:#fff;text-align:center;font-size:28px;font-weight:700;padding:10px}
 .clock{text-align:center}
@@ -28,43 +28,19 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 .notices{align-self:stretch;background:linear-gradient(#11ad41,#079437);color:#fff;overflow:hidden}
 .ntitle{text-align:center;font-size:28px;font-weight:700;padding:10px;border-bottom:1px solid rgba(255,255,255,.28)}
 .nbody{padding:12px 16px;font-size:20px;line-height:1.55;text-align:right}
-
-/* YNET בדיוק כמו בגרסה הישנה שעבדה */
-.ticker{
-  grid-column:1/3;
-  display:grid;
-  grid-template-columns:1fr 190px;
-  background:#f5f5f5;
-  border-top:1px solid #c7c7c7;
-  overflow:hidden;
-  direction:ltr
-}
+.ticker{grid-column:1/3;display:grid;grid-template-columns:1fr 190px;background:#f5f5f5;border-top:1px solid #c7c7c7;overflow:hidden;direction:ltr}
 .newswindow{position:relative;overflow:hidden;height:100%;direction:rtl}
-.newsline{
-  position:absolute;
-  top:50%;
-  right:100%;
-  white-space:nowrap;
-  font-size:25px;
-  transform:translateY(-50%);
-  animation:moveRTL 55s linear infinite;
-  direction:rtl;
-  text-align:right
-}
+.newsline{position:absolute;top:50%;right:100%;white-space:nowrap;font-size:25px;transform:translateY(-50%);animation:moveRTL 55s linear infinite;direction:rtl;text-align:right}
 @keyframes moveRTL{0%{right:100%}100%{right:-300%}}
-.brand{
-  display:flex;align-items:center;justify-content:center;gap:5px;
-  border-left:1px solid #bbb;
-  font:bold 41px Arial;
-  direction:ltr
-}
+.brand{display:flex;align-items:center;justify-content:center;gap:5px;border-left:1px solid #bbb;font:bold 41px Arial;direction:ltr}
 .y{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#d90000;color:#fff;font-size:38px}
+@media(max-width:1000px){.time{font-size:70px}.topbar{font-size:22px}.date{font-size:19px}.nbody{font-size:17px}.newsline{font-size:21px}}
 </style>
 </head>
 <body>
 <div class="app">
   <section class="visual">
-    <img id="mainImage" src="mishael-motors.png" alt="תמונת לובי">
+    <img id="mainImage" src="gurman.png" alt="תמונת לובי">
   </section>
 
   <aside class="panel">
@@ -106,24 +82,30 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 <script>
 const $=id=>document.getElementById(id);
 
-/* תמונות: מתחיל בפרסומת, אחרי 30 דקות ניקיון, וחוזר חלילה */
-let showingMishael=true;
-function setLobbyImage(){
-  $('mainImage').src=(showingMishael?'mishael-motors.png':'cleanliness.jpg')+'?v='+Date.now();
+/* רוטציה קבועה כל 20 דקות:
+   00-19 = gurman.png
+   20-39 = mishael-motors.png
+   40-59 = cleanliness.jpg
+*/
+function updateLobbyImage(){
+  const minutes = new Date().getMinutes();
+  let wanted = 'gurman.png';
+  if(minutes >= 20 && minutes < 40) wanted = 'mishael-motors.png';
+  if(minutes >= 40) wanted = 'cleanliness.jpg';
+
+  const img = $('mainImage');
+  const target = wanted + '?v=' + Math.floor(Date.now() / (20*60*1000));
+  if(!img.src.includes(wanted)) img.src = target;
 }
-setLobbyImage();
-setInterval(()=>{
-  showingMishael=!showingMishael;
-  setLobbyImage();
-},30*60*1000);
+updateLobbyImage();
+setInterval(updateLobbyImage, 30*1000);
 
 function updateClock(){
   const d=new Date();
   $('time').textContent=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit',hour12:false});
   $('date').textContent=d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 }
-updateClock();
-setInterval(updateClock,1000);
+updateClock(); setInterval(updateClock,1000);
 
 function weatherLabel(c){
  const m={0:['בהיר','☀️'],1:['בהיר לרוב','🌤️'],2:['מעונן חלקית','⛅'],3:['מעונן','☁️'],45:['ערפל','🌫️'],48:['ערפל','🌫️'],51:['טפטוף קל','🌦️'],53:['טפטוף','🌦️'],55:['טפטוף חזק','🌧️'],61:['גשם קל','🌦️'],63:['גשם','🌧️'],65:['גשם חזק','🌧️'],80:['ממטרים','🌦️'],81:['ממטרים','🌧️'],82:['ממטרים חזקים','⛈️'],95:['סופת רעמים','⛈️'],96:['סופת רעמים','⛈️'],99:['סופת רעמים','⛈️']};
@@ -155,7 +137,6 @@ async function updateWeather(){
 updateWeather();
 setInterval(updateWeather,10*60*1000);
 
-/* חדשות YNET דרך Cloudflare Pages Function - כמו במערכת הישנה */
 async function updateNews(){
  try{
    const d=await getJSON('/api/ynet?ts='+Date.now(),12000);
