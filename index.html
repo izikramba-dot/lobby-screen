@@ -88,15 +88,16 @@ const lobbyImages = [
   'gurman.png',
   'mishael-motors.png',
   'pizza-balls.png',
-  'cleanliness.jpg'
+  'cleanliness.jpg',
+  'private-lessons.png'
 ];
 
 function updateLobbyImage(){
   const now = new Date();
   const totalMinutes = now.getHours() * 60 + now.getMinutes();
 
-  // מחזור של 10 דקות: 5 תמונות × 2 דקות
-  const slot = Math.floor((totalMinutes % 10) / 2);
+  // מחזור של 12 דקות: 6 תמונות × 2 דקות
+  const slot = Math.floor((totalMinutes % 12) / 2);
   const wanted = lobbyImages[slot];
 
   const img = $('mainImage');
