@@ -90,7 +90,8 @@ const lobbyImages = [
   'pizza-balls.png',
   'cleanliness.jpg',
   'private-lessons.png',
-  'avi-group.png'
+  'avi-group.png',
+  'itzik-electrician.png'
 ];
 
 function updateLobbyImage(){
@@ -147,19 +148,45 @@ updateWeather();
 setInterval(updateWeather,10*60*1000);
 
 async function updateNews(){
- try{
-   const d=await getJSON('/api/ynet?ts='+Date.now(),12000);
-   if(d.items && d.items.length){
-      $('news').textContent=d.items.map(x=>x.title).join('   •   ');
-   } else {
-      throw new Error('no items');
-   }
- }catch(e){
-   $('news').textContent='חדשות ynet יתעדכנו אוטומטית כשהחיבור זמין';
- }
+  const newsEl = $('news');
+  const ynetFeed = 'https://www.ynet.co.il/Integration/StoryRss2.xml';
+
+  try{
+    // עובד גם באחסון סטטי כמו GitHub Pages — בלי צורך ב-/api/ynet
+    const url = 'https://api.rss2json.com/v1/api.json?rss_url=' +
+                encodeURIComponent(ynetFeed) + '&count=20&_=' + Date.now();
+
+    const d = await getJSON(url,15000);
+
+    if(d && d.status === 'ok' && Array.isArray(d.items) && d.items.length){
+      const titles = d.items
+        .map(x => (x.title || '').replace(/\s+/g,' ').trim())
+        .filter(Boolean)
+        .slice(0,20);
+
+      if(titles.length){
+        newsEl.textContent = titles.join('   •   ');
+        return;
+      }
+    }
+    throw new Error('RSS2JSON returned no headlines');
+  }catch(e){
+    // גיבוי למקרה שהאתר עדיין רץ ב-Cloudflare עם פונקציית /api/ynet
+    try{
+      const d2 = await getJSON('/api/ynet?ts='+Date.now(),8000);
+      if(d2 && Array.isArray(d2.items) && d2.items.length){
+        newsEl.textContent = d2.items
+          .map(x => x.title)
+          .filter(Boolean)
+          .join('   •   ');
+        return;
+      }
+    }catch(_){}
+    newsEl.textContent = 'חדשות ynet אינן זמינות כרגע — המערכת תנסה שוב אוטומטית';
+  }
 }
 updateNews();
-setInterval(updateNews,3*60*1000);
+setInterval(updateNews,10*60*1000);
 
 setTimeout(()=>location.reload(),6*60*60*1000);
 </script>
