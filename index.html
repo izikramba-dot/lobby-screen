@@ -89,20 +89,23 @@ const lobbyImages = [
   'mishael-motors.png',
   'pizza-balls.png',
   'cleanliness.jpg',
-  'private-lessons.png'
+  'private-lessons.png',
+  'avi-group.png'
 ];
 
 function updateLobbyImage(){
   const now = new Date();
   const totalMinutes = now.getHours() * 60 + now.getMinutes();
 
-  // מחזור של 12 דקות: 6 תמונות × 2 דקות
-  const slot = Math.floor((totalMinutes % 12) / 2);
+  // מחזור של 14 דקות: 7 תמונות × 2 דקות
+  const slot = Math.floor((totalMinutes % 14) / 2);
   const wanted = lobbyImages[slot];
 
   const img = $('mainImage');
+  const target = wanted + '?v=' + Math.floor(Date.now() / (2 * 60 * 1000));
+
   if (!img.src.includes(wanted)) {
-    img.src = wanted + '?v=' + Math.floor(Date.now() / (2 * 60 * 1000));
+    img.src = target;
   }
 }
 
