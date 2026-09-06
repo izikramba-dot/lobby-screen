@@ -40,7 +40,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 <body>
 <div class="app">
   <section class="visual">
-    <img id="mainImage" src="business-ad.png" alt="תמונת לובי">
+    <img id="mainImage" alt="תמונת לובי">
   </section>
 
   <aside class="panel">
@@ -82,7 +82,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-f
 <script>
 const $=id=>document.getElementById(id);
 
-/* רוטציית תמונות — מעבר אמיתי כל 60 שניות */
+/* רוטציית תמונות יציבה — תמונה אחרת בכל דקה לפי השעון */
 const lobbyImages = [
   'business-ad.png',
   'gurman.png',
@@ -95,42 +95,59 @@ const lobbyImages = [
   'shabbat-sweets.png'
 ];
 
-let currentImageIndex = 0;
-let lastChange = Date.now();
-const CHANGE_EVERY = 60 * 1000;
-const img = $('mainImage');
+const SLOT_MS = 60 * 1000;
+const mainImage = $('mainImage');
+let shownSlot = -1;
+let loadToken = 0;
 
-function showImage(index){
-  currentImageIndex = index % lobbyImages.length;
-  const file = lobbyImages[currentImageIndex];
-  img.src = file + '?v=' + Date.now();
-  img.dataset.file = file;
-  lastChange = Date.now();
+function loadSlideForSlot(slot){
+  const token = ++loadToken;
+  const total = lobbyImages.length;
+  const firstIndex = slot % total;
+  let attempts = 0;
 
-  // טוען מראש את התמונה הבאה
-  const next = new Image();
-  next.src = lobbyImages[(currentImageIndex + 1) % lobbyImages.length] + '?pre=' + Date.now();
+  function tryIndex(index){
+    if (token !== loadToken) return;
+    const file = lobbyImages[index];
+    const src = file + '?slot=' + slot;
+    const probe = new Image();
+
+    probe.onload = function(){
+      if (token !== loadToken) return;
+      mainImage.src = src;
+      mainImage.dataset.file = file;
+    };
+
+    probe.onerror = function(){
+      attempts++;
+      if (attempts < total) {
+        tryIndex((index + 1) % total);
+      }
+    };
+
+    probe.src = src;
+  }
+
+  tryIndex(firstIndex);
 }
 
-function nextImage(){
-  showImage((currentImageIndex + 1) % lobbyImages.length);
+function updateLobbyImage(force){
+  const slot = Math.floor(Date.now() / SLOT_MS);
+  if (!force && slot === shownSlot) return;
+  shownSlot = slot;
+  loadSlideForSlot(slot);
 }
 
-// אם קובץ מסוים חסר/נכשל — ממשיכים לתמונה הבאה במקום להיתקע
-img.addEventListener('error', ()=>{
-  setTimeout(nextImage, 1000);
+/* בדיקה כל שנייה. גם אם הטלוויזיה/דפדפן השהו טיימרים, החישוב לפי השעה מחזיר מיד לתמונה הנכונה. */
+updateLobbyImage(true);
+setInterval(function(){ updateLobbyImage(false); }, 1000);
+
+/* חזרה למסך אחרי שינה/מעבר אפליקציה */
+document.addEventListener('visibilitychange', function(){
+  if (!document.hidden) updateLobbyImage(true);
 });
-
-// מתחילים מהתמונה הראשונה
-showImage(0);
-
-// טיימר ראשי: כל דקה בדיוק
-setInterval(nextImage, CHANGE_EVERY);
-
-// watchdog: אם מסיבה כלשהי הדפדפן דילג על הטיימר, מכריח מעבר
-setInterval(()=>{
-  if (Date.now() - lastChange >= CHANGE_EVERY + 5000) nextImage();
-}, 5000);
+window.addEventListener('focus', function(){ updateLobbyImage(true); });
+window.addEventListener('pageshow', function(){ updateLobbyImage(true); });
 
 function updateClock(){
   const d=new Date();
