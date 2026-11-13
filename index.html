@@ -13,7 +13,7 @@
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-family:Arial,"Noto Sans Hebrew",sans-serif;color:#111}
 .app{width:100vw;height:100vh;background:#fff;display:grid;grid-template-columns:60% 40%;grid-template-rows:calc(100vh - 92px) 92px;direction:ltr}
 .visual{position:relative;overflow:hidden;background:#fff;border-right:1px solid var(--border)}
-.visual img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;background:#fff}
+.visual img{width:100%;height:100%;object-fit:contain;object-position:center;display:block;background:#fff}
 .panel{direction:rtl;padding:18px 22px 12px;display:grid;grid-template-rows:auto auto auto 1fr;gap:10px;background:#fff}
 .topbar{background:#242a31;color:#fff;text-align:center;font-size:28px;font-weight:700;padding:10px}
 .clock{text-align:center}
@@ -86,13 +86,10 @@ const $=id=>document.getElementById(id);
 const lobbyImages = [
   'business-ad.png',
   'gurman.png',
-  'mishael-motors.png',
   'pizza-balls.png',
   'cleanliness.jpg',
-  'private-lessons.png',
-  'avi-group.png',
   'itzik-electrician.png',
-  'shabbat-sweets-v2.png',
+  'shabbat-sweets-wide.png',
   'aviva-mahlouf.png'
 ];
 
